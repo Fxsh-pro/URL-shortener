@@ -16,7 +16,7 @@ public class UrlService {
     private final HashCache hashCache;
     private final HashRepository hashRepository;
 
-    @CachePut(value = "#url.getLongUrl()") // Не понимаю, что нужно сюда написать(
+    @CachePut(value = "#url.getLongUrl()")
     public String createShortLink(UrlDto url) {
         var hash = hashCache.getHash();
         return hashRepository.saveUrlAndHash(url.getLongUrl(), hash);
