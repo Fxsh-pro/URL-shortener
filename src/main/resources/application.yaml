@@ -1,9 +1,13 @@
 spring:
   datasource:
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://localhost:5432/postgres
+#    username: user
+#    password: password
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/postgres}
+    username: ${SPRING_DATASOURCE_USERNAME:user}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: user
-    password: password
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -13,6 +17,15 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  data:
+    redis:
+      port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST:0.0.0.0}
+
+
+  cache:
+    type: redis
 
 server:
   port: 8080

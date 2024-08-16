@@ -66,4 +66,8 @@ public class HashRepository {
             return Optional.empty();
         }
     }
+    public void update(String oldUrl, String newUrl) {
+        String sql = "Update url set url = ? WHERE url = ? RETURNING url";
+        jdbcTemplate.queryForRowSet(sql, newUrl, oldUrl);
+    }
 }

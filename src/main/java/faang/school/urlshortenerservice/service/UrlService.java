@@ -1,12 +1,12 @@
 package faang.school.urlshortenerservice.service;
 
+import faang.school.urlshortenerservice.dto.UpdateDto;
 import faang.school.urlshortenerservice.dto.UrlDto;
 import faang.school.urlshortenerservice.exception.UrlNotFoundException;
 import faang.school.urlshortenerservice.repository.HashRepository;
+import faang.school.urlshortenerservice.repository.UrlCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,19 +15,28 @@ import org.springframework.stereotype.Service;
 public class UrlService {
     private final HashCache hashCache;
     private final HashRepository hashRepository;
+    private final UrlCache urlCache;
 
-    @CachePut(value = "#url.getLongUrl()")
     public String createShortLink(UrlDto url) {
         var hash = hashCache.getHash();
+        urlCache.put(hash, url.getLongUrl());
         return hashRepository.saveUrlAndHash(url.getLongUrl(), hash);
     }
 
-    @Cacheable(value = "originUrl", key = "#url")
     public String getOriginUrl(String url) {
         log.info("Getting origin URL for: " + url);
-        var originUrl = hashRepository.getOriginalUrl(url).orElseThrow(
-                () -> new UrlNotFoundException("404", "Original URL not found for the given short URL")
-        );
+
+        String originUrl = urlCache.getUrl(url)
+                .orElseGet(
+                        () -> hashRepository.getOriginalUrl(url)
+                        .orElseThrow(() -> new UrlNotFoundException("404", "Original URL not found for the given short URL"))
+                );
+//        String originUrl = hashRepository.getOriginalUrl(url)
+//                .orElseThrow(() -> new UrlNotFoundException("404", "Original URL not found for the given short URL"));
         return originUrl;
+    }
+
+    public void update(UpdateDto dto) {
+        hashRepository.update(dto.getOldUrl(), dto.getNewUrl());
     }
 }
