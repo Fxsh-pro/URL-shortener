@@ -26,7 +26,8 @@ WORKDIR ${SRC_DIR}/
 RUN gradle bootJar -i --stacktrace
 
 # RUNNER
-FROM gradle:jdk17
+FROM --platform=linux/arm64 eclipse-temurin:17-jre AS runner
+# FROM gradle:jdk17
 # FROM --platform=linux/arm64 docker.io/openjdk:17-alpine
 # FROM --platform=linux/arm64 gradle:jdk17-alpine AS cache
 
@@ -35,6 +36,6 @@ ENV SRC_DIR=/usr/src/java-code
 
 COPY --from=builder ${SRC_DIR}/build/libs/*.jar ./app.jar
 
-RUN apt-get update && apt-get install -y netcat
+RUN apt-get update && apt-get install -y netcat-openbsd
 
 CMD ["java", "-jar", "app.jar"]
